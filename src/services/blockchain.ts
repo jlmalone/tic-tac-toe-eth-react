@@ -1,4 +1,6 @@
 // src/services/blockchain.ts
+
+// Ensure all necessary imports are at the top of the file:
 import {
     ethers,
     BrowserProvider,
@@ -7,27 +9,26 @@ import {
     TransactionResponse,
     TransactionReceipt,
     Log,
-    Overrides, // Use Overrides for both read and write operations
+    Overrides,
     InterfaceAbi,
     AddressLike,
     BigNumberish,
     BaseContract,
     resolveAddress
 } from 'ethers';
+// Assume FACTORY_ABI, GAME_ABI, CONTRACT_ADDRESSES, EXPECTED_CHAIN_ID, ZERO_ADDRESS are correctly imported
 import { FACTORY_ABI, GAME_ABI } from '../contracts/abis';
 import { CONTRACT_ADDRESSES, EXPECTED_CHAIN_ID, ZERO_ADDRESS } from '../contracts/addresses';
 
-// Type definition for the GameCreated event structure
+// Assume GameCreatedEventArgs interface is defined correctly (matching your Solidity event signature)
 interface GameCreatedEventArgs {
-    gameAddress: string;
-    player1: string;
-    player2: string;
-}
-interface GameCreatedEventLog extends Log { // Not strictly used if directly parsing, but good for context
-    args: GameCreatedEventArgs;
+    gameAddress: string; // Based on your Solidity `event GameCreated(address indexed gameAddress);`
+    // Remove player1 and player2 if they are not in the Solidity event args
+    // player1?: string;
+    // player2?: string;
 }
 
-// Define an interface for your Game Contract for better type safety
+// Assume GameContract interface is defined correctly
 interface GameContract extends BaseContract {
     makeMove(row: BigNumberish, col: BigNumberish, overrides?: Overrides): Promise<TransactionResponse>;
     getBoardState(overrides?: Overrides): Promise<AddressLike[][]>;
@@ -39,13 +40,128 @@ interface GameContract extends BaseContract {
     interface: ethers.Interface;
 }
 
-
+// Assume global variables are declared
 let provider: BrowserProvider | null = null;
 let signer: Signer | null = null;
 let factoryContract: Contract | null = null;
 let gameContract: GameContract | null = null;
 let currentAccount: string | null = null;
 let currentChainId: number | null = null;
+
+// Assume connectWallet and setGameAddress functions are defined (setGameAddress is async)
+// ... rest of the file before createGame ...
+
+export async function createGame(): Promise<string> {
+    if (!signer) {
+        throw new Error('Wallet not connected or signer not available.');
+    }
+    if (!factoryContract) {
+        throw new Error('Factory contract not initialized.');
+    }
+    // Check factoryContract.interface before using it for getEvent
+    if (!factoryContract.interface) {
+        throw new Error('Factory contract interface not available for event parsing.');
+    }
+
+    console.log("Attempting to create game...");
+    try {
+        // Send the transaction
+        // Assuming 'createGame' is a method on the factoryContract.
+        // Use 'as any' if factoryContract is not typed with createGame method.
+        const tx: TransactionResponse = await (factoryContract as any).createGame();
+        console.log("Create game transaction sent:", tx.hash);
+
+        // Wait for receipt
+        const receipt: TransactionReceipt | null = await tx.wait();
+        console.log("Transaction receipt:", receipt); // Log the full receipt object
+
+        // Check receipt status
+        if (!receipt) {
+            throw new Error("Transaction failed: No receipt received.");
+        }
+        if (receipt.status !== 1) {
+            console.error("Transaction reverted:", receipt); // Should not happen based on Etherscan
+            throw new Error("Game creation transaction failed (reverted). Check console.");
+        }
+
+        // Get event details from ABI
+        const gameCreatedEventName = 'GameCreated'; // Event name from Solidity
+        const gameCreatedEventFragment = factoryContract.interface.getEvent(gameCreatedEventName);
+        if (!gameCreatedEventFragment) {
+            throw new Error(`Event "${gameCreatedEventName}" not found in factory contract ABI.`);
+        }
+        const gameCreatedTopic = gameCreatedEventFragment.topicHash; // Topic hash based on ABI
+
+        // Get factory address before filtering logs
+        const factoryAddressLower = (await factoryContract.getAddress()).toLowerCase();
+
+        // VVVVVVVVVVVVVV ADDED DEBUG LOGGING VVVVVVVVVVVVVV
+        console.log("DEBUG: Expected factory address for logs:", factoryAddressLower);
+        console.log("DEBUG: Calculated GameCreated topic (Topic 0):", gameCreatedTopic);
+        console.log("DEBUG: Total logs in receipt:", receipt.logs.length);
+        console.log("DEBUG: All logs in receipt:", JSON.stringify(receipt.logs, null, 2)); // Pretty print logs for inspection
+        // ^^^^^^^^^^^^^^ ADDED DEBUG LOGGING ^^^^^^^^^^^^^^
+
+
+        // Find the specific log for GameCreated event emitted by the factory contract
+        const gameCreatedLog = receipt.logs.find(
+            log => log.address.toLowerCase() === factoryAddressLower &&
+                log.topics[0] === gameCreatedTopic
+        );
+
+        // Check if log was found
+        if (!gameCreatedLog) {
+            console.error("GameCreated event not found in transaction logs from factory.", {
+                logs: receipt.logs,
+                expectedTopic: gameCreatedTopic,
+                factoryAddress: factoryAddressLower
+            });
+            throw new Error("Could not find GameCreated event in the transaction logs from factory.");
+        }
+
+        // Parse the log
+        // Ensure the log object structure matches what parseLog expects { topics, data }
+        const parsedLog = factoryContract.interface.parseLog({ topics: Array.from(gameCreatedLog.topics), data: gameCreatedLog.data });
+        if (!parsedLog) {
+            throw new Error("Failed to parse GameCreated event log.");
+        }
+
+        // Extract arguments using the typed interface (with unknown cast)
+        // Ensure the eventArgs type matches the ABI definition
+        const eventArgs = parsedLog.args as unknown as GameCreatedEventArgs; // Apply the fix here
+        const newGameAddress = eventArgs?.gameAddress;
+
+        // Validate extracted address
+        if (!newGameAddress || !ethers.isAddress(newGameAddress)) {
+            console.error("Extracted game address is invalid:", newGameAddress, "Parsed Log Args:", eventArgs);
+            throw new Error("Failed to extract a valid game address from the event.");
+        }
+
+        // Success - set game address and return
+        console.log(`Game created! Address: ${newGameAddress}`);
+        // Log player addresses from args if they exist in GameCreatedEventArgs
+        // if (eventArgs.player1) console.log(`Player 1: ${eventArgs.player1}`);
+        // if (eventArgs.player2) console.log(`Player 2: ${eventArgs.player2}`);
+
+        await setGameAddress(newGameAddress); // Assumes setGameAddress exists and is async
+        return newGameAddress;
+
+    } catch (error: any) {
+        console.error("Failed to create game:", error);
+        const reason = (error.data?.message || error.reason || error.message || "Unknown error");
+        // Check specifically for "game has already ended" or similar revert messages if needed
+        // if (reason.includes("Game has already ended")) { ... }
+        throw new Error(`Failed to create game: ${reason}`);
+    }
+}
+
+
+// let provider: BrowserProvider | null = null;
+// let signer: Signer | null = null;
+// let factoryContract: Contract | null = null;
+// let gameContract: GameContract | null = null;
+// let currentAccount: string | null = null;
+// let currentChainId: number | null = null;
 
 export async function connectWallet(): Promise<string> {
     if (!window.ethereum) {
@@ -102,71 +218,71 @@ export async function connectWallet(): Promise<string> {
     }
 }
 
-
-export async function createGame(): Promise<string> {
-    if (!signer) throw new Error('Wallet not connected or signer not available.');
-    if (!factoryContract) throw new Error('Factory contract not initialized.');
-    if (!factoryContract.interface) throw new Error('Factory contract interface not available for event parsing.');
-
-    console.log("Attempting to create game...");
-    try {
-        const tx: TransactionResponse = await (factoryContract as any).createGame();
-        console.log("Create game transaction sent:", tx.hash);
-        const receipt: TransactionReceipt | null = await tx.wait();
-        console.log("Transaction receipt:", receipt);
-
-        if (!receipt) throw new Error("Transaction failed: No receipt received.");
-        if (receipt.status !== 1) {
-            console.error("Transaction reverted:", receipt);
-            throw new Error("Game creation transaction failed (reverted). Check console.");
-        }
-
-        const gameCreatedEventName = 'GameCreated';
-        const gameCreatedEventFragment = factoryContract.interface.getEvent(gameCreatedEventName);
-        if (!gameCreatedEventFragment) {
-            throw new Error(`Event "${gameCreatedEventName}" not found in factory contract ABI.`);
-        }
-        const gameCreatedTopic = gameCreatedEventFragment.topicHash;
-
-        // VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-        // THE FIX IS HERE:
-        const factoryAddressLower = (await factoryContract.getAddress()).toLowerCase(); // Get address beforehand
-
-        const gameCreatedLog = receipt.logs.find(
-            log => log.address.toLowerCase() === factoryAddressLower &&
-                log.topics[0] === gameCreatedTopic
-        );
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-        if (!gameCreatedLog) {
-            console.error("GameCreated event not found in transaction logs from factory.", {
-                logs: receipt.logs,
-                expectedTopic: gameCreatedTopic,
-                factoryAddress: factoryAddressLower
-            });
-            throw new Error("Could not find GameCreated event in the transaction logs from factory.");
-        }
-
-        const parsedLog = factoryContract.interface.parseLog({ topics: Array.from(gameCreatedLog.topics), data: gameCreatedLog.data });
-        if (!parsedLog) throw new Error("Failed to parse GameCreated event log.");
-
-        const eventArgs = parsedLog.args as unknown as GameCreatedEventArgs;
-        const newGameAddress = eventArgs?.gameAddress;
-
-        if (!newGameAddress || !ethers.isAddress(newGameAddress)) {
-            console.error("Extracted game address is invalid:", newGameAddress, "Parsed Log Args:", eventArgs);
-            throw new Error("Failed to extract a valid game address from the event.");
-        }
-
-        console.log(`Game created! Address: ${newGameAddress}, Player1: ${eventArgs.player1}, Player2: ${eventArgs.player2}`);
-        await setGameAddress(newGameAddress);
-        return newGameAddress;
-    } catch (error: any) {
-        console.error("Failed to create game:", error);
-        const reason = (error.data?.message || error.reason || error.message || "Unknown error");
-        throw new Error(`Failed to create game: ${reason}`);
-    }
-}
+//
+// export async function createGame(): Promise<string> {
+//     if (!signer) throw new Error('Wallet not connected or signer not available.');
+//     if (!factoryContract) throw new Error('Factory contract not initialized.');
+//     if (!factoryContract.interface) throw new Error('Factory contract interface not available for event parsing.');
+//
+//     console.log("Attempting to create game...");
+//     try {
+//         const tx: TransactionResponse = await (factoryContract as any).createGame();
+//         console.log("Create game transaction sent:", tx.hash);
+//         const receipt: TransactionReceipt | null = await tx.wait();
+//         console.log("Transaction receipt:", receipt);
+//
+//         if (!receipt) throw new Error("Transaction failed: No receipt received.");
+//         if (receipt.status !== 1) {
+//             console.error("Transaction reverted:", receipt);
+//             throw new Error("Game creation transaction failed (reverted). Check console.");
+//         }
+//
+//         const gameCreatedEventName = 'GameCreated';
+//         const gameCreatedEventFragment = factoryContract.interface.getEvent(gameCreatedEventName);
+//         if (!gameCreatedEventFragment) {
+//             throw new Error(`Event "${gameCreatedEventName}" not found in factory contract ABI.`);
+//         }
+//         const gameCreatedTopic = gameCreatedEventFragment.topicHash;
+//
+//         // VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+//         // THE FIX IS HERE:
+//         const factoryAddressLower = (await factoryContract.getAddress()).toLowerCase(); // Get address beforehand
+//
+//         const gameCreatedLog = receipt.logs.find(
+//             log => log.address.toLowerCase() === factoryAddressLower &&
+//                 log.topics[0] === gameCreatedTopic
+//         );
+//         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//
+//         if (!gameCreatedLog) {
+//             console.error("GameCreated event not found in transaction logs from factory.", {
+//                 logs: receipt.logs,
+//                 expectedTopic: gameCreatedTopic,
+//                 factoryAddress: factoryAddressLower
+//             });
+//             throw new Error("Could not find GameCreated event in the transaction logs from factory.");
+//         }
+//
+//         const parsedLog = factoryContract.interface.parseLog({ topics: Array.from(gameCreatedLog.topics), data: gameCreatedLog.data });
+//         if (!parsedLog) throw new Error("Failed to parse GameCreated event log.");
+//
+//         const eventArgs = parsedLog.args as unknown as GameCreatedEventArgs;
+//         const newGameAddress = eventArgs?.gameAddress;
+//
+//         if (!newGameAddress || !ethers.isAddress(newGameAddress)) {
+//             console.error("Extracted game address is invalid:", newGameAddress, "Parsed Log Args:", eventArgs);
+//             throw new Error("Failed to extract a valid game address from the event.");
+//         }
+//
+//         console.log(`Game created! Address: ${newGameAddress}`);
+//         await setGameAddress(newGameAddress);
+//         return newGameAddress;
+//     } catch (error: any) {
+//         console.error("Failed to create game:", error);
+//         const reason = (error.data?.message || error.reason || error.message || "Unknown error");
+//         throw new Error(`Failed to create game: ${reason}`);
+//     }
+// }
 
 export async function setGameAddress(address: string | null): Promise<void> {
     const activeProvider = provider;
