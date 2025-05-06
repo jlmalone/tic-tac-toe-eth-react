@@ -215,12 +215,19 @@ function App() {
 
   // --- Render ---
   return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <h1 className="text-2xl font-bold mb-4 text-center">Tic-Tac-Toe on Blockchain</h1>
+      // <div className="min-h-screen bg-matrix-black text-matrix-green flex items-center justify-center p-4">
+
+      /*<div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">*/
+        <div className="min-h-screen bg-black text-[#00cc66] font-mono flex items-center justify-center p-4">
+          <div className="bg-black border border-[#00cc66] p-6 rounded-lg shadow-[0_0_10px_#00cc66] w-full max-w-sm sm:max-w-md w-full">
+
+
+            <h1 className="text-2xl font-bold mb-4 text-center text-[#00cc66] animate-pulse">Tic-Tac-Toe</h1>
 
           {/* Connection Info */}
-          <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+          {/*<div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">*/}
+            <div className="mb-4 p-3 bg-black border border-[#00cc66] rounded">
+
             {account ? (
                 <div>
                   <p>Connected: <span className="font-mono text-sm">{shortenAddress(account)}</span></p>
@@ -231,7 +238,11 @@ function App() {
                 <button
                     onClick={handleConnect}
                     disabled={isLoading}
-                    className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="border border-[#00cc66] text-[#00cc66] px-4 py-2 rounded hover:bg-[#00cc66] hover:text-black transition-all"
+
+                    // className="bg-matrix-green text-black px-4 py-2 rounded hover:bg-green-400 disabled:bg-gray-400"
+
+                    // className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Connecting...' : 'Connect Wallet'}
                 </button>
@@ -242,26 +253,37 @@ function App() {
           {account && chainId === EXPECTED_CHAIN_ID && (
               <div className="space-y-4">
                 {/* Create / Join */}
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
+
+                {/*<div className="flex flex-col sm:flex-row gap-2">*/}
                   <button
                       onClick={handleCreateGame}
                       disabled={isLoading}
-                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex-shrink-0"
+                      className="border border-[#00cc66] text-[#00cc66] px-4 py-2 rounded hover:bg-[#00cc66] hover:text-black transition-all flex-shrink-0"
+
+                      // className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex-shrink-0"
                   >
                     {isLoading ? 'Creating...' : 'Create Game'}
                   </button>
                   <input
                       type="text"
                       value={gameAddr}
+                      // placeholder=[#00ff00]
                       onChange={(e) => setGameAddr(e.target.value)}
                       placeholder="Or Enter Game Address to Join"
-                      className="border p-2 rounded flex-grow font-mono text-sm"
+                      // className="border border-matrix-green bg-black text-matrix-green p-2 rounded"
+                      className="border border-matrix-green bg-black text-matrix-green placeholder-[#00ff00] p-2 rounded"
+
+                      // className="border p-2 rounded flex-grow font-mono text-sm"
                       disabled={isLoading}
                   />
                   <button
                       onClick={() => handleJoinGame(gameAddr)} // Pass current input value
                       disabled={!gameAddr || isLoading || !/^0x[a-fA-F0-9]{40}$/.test(gameAddr)}
-                      className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex-shrink-0"
+
+                      // className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex-shrink-0"
+                      className="border border-[#00cc66] text-[#00cc66] px-4 py-2 rounded hover:bg-[#00cc66] hover:text-black transition-all flex-shrink-0"
+
                   >
                     {isLoading ? 'Joining...' : 'Join Game'}
                   </button>
@@ -269,18 +291,24 @@ function App() {
 
                 {/* Gameplay Area (only if game joined) */}
                 {gameAddr && (
-                    <div className="border-t pt-4 space-y-4">
+                    <div className="border-t pt-4 space-y-4 border-matrix-green/50">
+
+
                       <p className="text-center font-semibold">Game: <span className="font-mono text-sm">{shortenAddress(gameAddr)}</span></p>
 
                       {/* Board Display */}
-                      <div className="grid grid-cols-3 gap-1 mx-auto w-48 h-48 border bg-gray-200 p-1 rounded">
+                      <div className="grid grid-cols-3 gap-1 mx-auto w-48 h-48 border border-[#00cc66] bg-black p-1 rounded">
+
+                      {/*<div className="grid grid-cols-3 gap-1 mx-auto w-48 h-48 border bg-gray-200 p-1 rounded">*/}
                         {board.flat().map((cell, index) => {
                           const r = Math.floor(index / 3);
                           const c = index % 3;
                           return (
                               <div
                                   key={`cell-${r}-${c}-${index}`} // <--- FIX: Use a unique expression
-                                  className="w-full h-full flex items-center justify-center bg-white text-3xl font-bold border border-gray-300 rounded-sm"
+                                  className="w-full h-full flex items-center justify-center bg-black text-matrix-green text-3xl font-bold border border-matrix-green"
+
+                                  // className="w-full h-full flex items-center justify-center bg-white text-3xl font-bold border border-gray-300 rounded-sm"
                                   title={`Cell [${r}, ${c}] Owner: ${cell}`}
                               >
                                 {emojiForAddress(cell)}
@@ -299,7 +327,9 @@ function App() {
                                 value={rowInput}
                                 onChange={(e) => setRowInput(e.target.value.replace(/[^0-2]/, ''))} // Allow only 0, 1, 2
                                 placeholder="Row (0-2)"
-                                className="border p-2 rounded w-20 text-center"
+                                // className="border p-2 rounded w-20 text-center"
+                                className="border border-[#00cc66] bg-black text-[#00cc66] p-2 rounded w-20 text-center"
+
                                 disabled={isLoading}
                             />
                             <input
@@ -308,13 +338,19 @@ function App() {
                                 value={colInput}
                                 onChange={(e) => setColInput(e.target.value.replace(/[^0-2]/, ''))} // Allow only 0, 1, 2
                                 placeholder="Col (0-2)"
-                                className="border p-2 rounded w-20 text-center"
+                                // className="border p-2 rounded w-20 text-center"
+                                // className="border border-matrix-green bg-black text-matrix-green placeholder-[#00ff00] p-2 rounded"
+
+                                className="border border-[#00cc66] bg-black text-[#00cc66] p-2 rounded w-20 text-center"
+
                                 disabled={isLoading}
                             />
                             <button
                                 onClick={handleMakeMove}
                                 disabled={isLoading || isGameOver}
-                                className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                // className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                className="border border-[#00cc66] text-[#00cc66] px-4 py-2 rounded hover:bg-[#00cc66] hover:text-black transition-all"
+
                             >
                               {isLoading ? 'Moving...' : 'Make Move'}
                             </button>
@@ -325,7 +361,9 @@ function App() {
                       <button
                           onClick={() => handleRefreshBoard(null)} // Pass null to indicate manual refresh
                           disabled={isLoading}
-                          className="w-full bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          className="w-full border border-[#00cc66] text-[#00cc66] px-4 py-2 rounded hover:bg-[#00cc66] hover:text-black transition-all"
+
+                          // className="w-full bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                       >
                         {isLoading ? 'Refreshing...' : 'Refresh Board Manually'}
                       </button>
@@ -335,7 +373,9 @@ function App() {
           )}
 
           {/* Status Message */}
-          <p className={`mt-4 text-center text-sm ${status.startsWith('Error') ? 'text-red-600' : 'text-gray-700'}`}>
+            <p className={`mt-4 text-center text-sm ${status.startsWith('Error') ? 'text-red-500' : 'text-[#00cc66]'}`}>
+
+            {/*<p className={`mt-4 text-center text-sm ${status.startsWith('Error') ? 'text-red-600' : 'text-gray-700'}`}>*/}
             {status}
           </p>
         </div>

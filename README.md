@@ -7,7 +7,7 @@ A fully decentralized, Ethereum-based multiplayer Tic-Tac-Toe game with a React 
 - **Frontend:** React 19 + TypeScript + Tailwind CSS
 - **Blockchain Interaction:** Ethers.js (v6)
 - **Smart Contracts:** Solidity (deployed on Sepolia + Hardhat)
-- **UI Styling:** Tailwind CSS
+- **UI Styling:** Tailwind CSSnop
 - **Testing:** Jest + React Testing Library
 
 ---
@@ -116,7 +116,7 @@ export const CONTRACT_ADDRESSES = {
 ## 📸 UI Snapshot (example)
 
 ```
-🧠   Tic-Tac-Toe on Blockchain
+🧠   Tic-Tac-Toe - ETH, React, Sepolia, Solidity, ethers.js
 [ Connect Wallet ]
 
 🟦🟩🟥   ← board state shown with emojis
