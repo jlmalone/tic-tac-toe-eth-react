@@ -43,7 +43,7 @@ This is a decentralized version of Tic-Tac-Toe built on the Ethereum Sepolia tes
 - You can play with anyone else using the same contract address.
 
 ## 🤖 Resources
-- [![GitHub Octocat](/octocat.png)](https://github.com/jlmalone/tic-tac-toe-eth-react/) GitHub: [Source Code](https://github.com/jlmalone/tic-tac-toe-eth-react)
+- [![GitHub Octocat](octocat.png)](https://github.com/jlmalone/tic-tac-toe-eth-react/) GitHub: [Source Code](https://github.com/jlmalone/tic-tac-toe-eth-react)
 `;
 
 const InstructionsModal: React.FC<InstructionsModalProps> = ({ onClose }) => (
