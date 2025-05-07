@@ -2,6 +2,10 @@
 
 A fully decentralized, Ethereum-based multiplayer Tic-Tac-Toe game with a React + TypeScript + TailwindCSS frontend. Connect your MetaMask wallet, start or join a blockchain-backed game, and play with real transaction-based moves stored immutably on-chain.
 
+## Summary
+
+This project is a decentralized Tic-Tac-Toe game built with React + TypeScript and styled using TailwindCSS in a matrix-inspired theme. It connects to the Ethereum Sepolia testnet (or a Hardhat local node) using ethers.js, with game logic handled by smart contracts: a TicTacToeFactory that deploys individual MultiPlayerTicTacToe contracts per game. The frontend supports wallet connection via MetaMask, real-time board updates, win/draw detection, and displays gameplay history via modals. The app includes rich UI feedback, error handling, and supports dynamic game joining by contract address.
+
 ### ⚙️ Tech Stack
 
 - **Frontend:** React 19 + TypeScript + Tailwind CSS
