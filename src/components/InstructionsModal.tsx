@@ -1,6 +1,7 @@
 // src/components/InstructionsModal.tsx
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface InstructionsModalProps {
     onClose: () => void;
@@ -15,11 +16,11 @@ This is a decentralized version of Tic-Tac-Toe built on the Ethereum Sepolia tes
 ## ✅ Steps to Get Started
 
 1. **Install MetaMask** if you haven't already. It's required to interact with Ethereum-based apps.  
-   👉 [https://metamask.io](https://metamask.io)
+   🦊 [Metamask](https://metamask.io)
 
 2. **Get Sepolia Testnet ETH**  
    Visit a faucet like:  
-   👉 [https://cloud.google.com/application/web3/faucet/ethereum/sepolia](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
+   🚰 [Google Crypto Testnet Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
 
 3. **Connect your wallet** by clicking the **Connect Wallet** button in the app.
 
@@ -41,12 +42,8 @@ This is a decentralized version of Tic-Tac-Toe built on the Ethereum Sepolia tes
 - Each action (creating, joining, moving) is an Ethereum transaction.  
 - You can play with anyone else using the same contract address.
 
-## Resources
-
-- Source Code: [https://github.com/jlmalone/tic-tac-toe-eth-react/](https://github.com/jlmalone/tic-tac-toe-eth-react))
-
-
-Happy hacking 🤖
+## 🤖 Resources
+- [![GitHub Octocat](/octocat.png)](https://github.com/jlmalone/tic-tac-toe-eth-react/) GitHub: [Source Code](https://github.com/jlmalone/tic-tac-toe-eth-react)
 `;
 
 const InstructionsModal: React.FC<InstructionsModalProps> = ({ onClose }) => (
@@ -54,8 +51,37 @@ const InstructionsModal: React.FC<InstructionsModalProps> = ({ onClose }) => (
         <div className="flex flex-col bg-black border border-[#00cc66] rounded-lg shadow-[0_0_10px_#00cc66] w-full max-w-2xl max-h-[80vh]">
 
             {/* Scrollable markdown area */}
-            <div className="overflow-y-auto p-6 prose prose-invert prose-lg text-[#00cc66]">
-                <ReactMarkdown>{markdown}</ReactMarkdown>
+            <div
+                className="
+          overflow-y-auto p-6
+          prose prose-invert prose-lg
+          text-[#00cc66]
+          [&_h1]:text-[#00cc66]
+          [&_h2]:text-[#00cc66]
+          [&_h3]:text-[#00cc66]
+          [&_p]:text-[#00cc66]
+          [&_li]:text-[#00cc66]
+          [&_a]:text-[#00cc66]
+        "
+            >
+                <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                        // shrink every image in markdown to 16×16, add green glow
+                        img: ({node, ...props}) => (
+                            <img
+                                {...props}
+                                className="inline w-9 h-9 filter hover:drop-shadow-[0_0_4px_#00cc66] mr-1"
+                            />
+                        ),
+                        // ensure links stay green
+                        a: ({node, ...props}) => (
+                            <a {...props} className="text-[#00cc66] hover:underline" />
+                        ),
+                    }}
+                >
+                    {markdown}
+                </ReactMarkdown>
             </div>
 
             {/* Footer with always‑visible Close */}

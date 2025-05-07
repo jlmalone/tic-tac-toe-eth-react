@@ -19,6 +19,7 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
   const [games, setGames] = useState<GameRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [explorerBase, setExplorerBase] = useState<string>('https://etherscan.io');
 
   useEffect(() => {
     async function fetchHistory() {
@@ -26,7 +27,15 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
         const provider =
             getProvider() ?? new ethers.BrowserProvider((window as any).ethereum);
         const network = await provider.getNetwork();
-        const chainId = Number(network.chainId);  // ensure number
+        const chainId = Number(network.chainId);
+
+        // pick the correct Etherscan based on chain
+        const base =
+            chainId === 11155111
+                ? 'https://sepolia.etherscan.io'
+                : 'https://etherscan.io';
+        setExplorerBase(base);
+
         const factoryAddress = CONTRACT_ADDRESSES[chainId]?.factoryAddress;
         if (!factoryAddress) throw new Error('No factory configured for this network.');
 
@@ -35,22 +44,10 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
         const logs = await factory.queryFilter(filter, 0, 'latest');
 
         const records: GameRecord[] = [];
-
         for (const log of logs) {
-
-
-
-          const parsedLog = factory.interface.parseLog(log);
-          if (!parsedLog || !parsedLog.args) {
-            // skip logs that didn’t match
-            continue;
-          }
-          const gameAddr = parsedLog.args.gameAddress as string;
-
-
-          // const parsedLog = factory.interface.parseLog(log);
-          // if (!parsedLog.args) continue;
-          // const gameAddr = parsedLog.args.gameAddress as string;
+          const parsed = factory.interface.parseLog(log);
+          if (!parsed || !parsed.args) continue;
+          const gameAddr = parsed.args.gameAddress as string;
 
           const gameContract = new ethers.Contract(gameAddr, GAME_ABI, provider);
           let winner = '';
@@ -62,7 +59,6 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
           } catch {
             winner = '';
           }
-
           records.push({ address: gameAddr, winner });
         }
 
@@ -73,7 +69,6 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
         setLoading(false);
       }
     }
-
     fetchHistory();
   }, []);
 
@@ -96,16 +91,33 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
                   </tr>
                   </thead>
                   <tbody>
-                  {games.map((record, idx) => (
-                      <tr key={record.address}>
-                        <td className="border border-[#00cc66] p-2 text-center">{idx + 1}</td>
+                  {games.map((rec, i) => (
+                      <tr key={rec.address}>
+                        <td className="border border-[#00cc66] p-2 text-center">{i + 1}</td>
                         <td className="border border-[#00cc66] p-2">
-                          {shortenAddress(record.address)}
+                          <a
+                              href={`${explorerBase}/address/${rec.address}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline"
+                          >
+                            {shortenAddress(rec.address)}
+                          </a>
                         </td>
                         <td className="border border-[#00cc66] p-2">
-                          {record.winner
-                              ? `${emojiForAddress(record.winner)} ${shortenAddress(record.winner)}`
-                              : '-'}
+                          {rec.winner ? (
+                              <a
+                                  href={`${explorerBase}/address/${rec.winner}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:underline inline-flex items-center space-x-1"
+                              >
+                                <span>{emojiForAddress(rec.winner)}</span>
+                                <span>{shortenAddress(rec.winner)}</span>
+                              </a>
+                          ) : (
+                              '–'
+                          )}
                         </td>
                       </tr>
                   ))}
