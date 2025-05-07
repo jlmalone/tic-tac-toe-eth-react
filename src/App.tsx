@@ -4,6 +4,8 @@ import * as blockchain from './services/blockchain';
 import { emojiForAddress, shortenAddress } from './utils/helpers';
 import { ZERO_ADDRESS, EXPECTED_CHAIN_ID } from './contracts/addresses';
 import './App.css'; // Keep or remove if not needed
+import StatsModal from './components/StatsModal';
+import InstructionsModal from './components/InstructionsModal';
 
 // Define Board type
 type Board = string[][];
@@ -19,6 +21,10 @@ function App() {
   const [rowInput, setRowInput] = useState<string>('0');
   const [colInput, setColInput] = useState<string>('0');
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+
+  // toggle our two modals
+  const [showStats, setShowStats] = useState<boolean>(false);
+  const [showInstructions, setShowInstructions] = useState<boolean>(false);
 
   // --- Wallet Connection ---
   const handleConnect = useCallback(async () => {
@@ -219,10 +225,44 @@ function App() {
 
       /*<div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">*/
         <div className="min-h-screen bg-black text-[#00cc66] font-mono flex items-center justify-center p-4">
-          <div className="bg-black border border-[#00cc66] p-6 rounded-lg shadow-[0_0_10px_#00cc66] w-full max-w-sm sm:max-w-md w-full">
+          <div className="absolute bottom-2 left-2">
+            <button onClick={() => setShowStats(true)} title="View Stats">
+              <img
+                  src="/bar-chart.png"
+                  alt="Stats"
+                  className="w-6 h-6 filter hover:drop-shadow-[0_0_4px_#00cc66] transition"
+
+              />
+              {/*className="w-6 h-6 hover:opacity-80 transition"*/}
+            </button>
+          </div>
+
+          {/*<div className="absolute bottom-2 left-2">*/}
+          {/*  <button onClick={() => setShowStats(true)} title="View Stats">*/}
+          {/*    📊*/}
+          {/*  </button>*/}
+          {/*</div>*/}
+
+          <div
+              className="text-[#00cc66] hover:drop-shadow-[0_0_4px_#00cc66] transition"
+
+          >
+            {/*className="absolute bottom-2 right-2"*/}
+
+            <button onClick={() => setShowInstructions(true)} title="How to Play">
+              ❔
+            </button>
+          </div>
+          {/*<div className="bg-black border border-[#00cc66] p-6 rounded-lg shadow-[0_0_10px_#00cc66] w-full max-w-sm sm:max-w-md w-full">*/}
+            <div className="relative bg-black border border-[#00cc66] p-6 rounded-lg shadow-[0_0_10px_#00cc66] w-full max-w-sm sm:max-w-md">
 
 
             <h1 className="text-2xl font-bold mb-4 text-center text-[#00cc66] animate-pulse">Tic-Tac-Toe</h1>
+
+
+
+
+
 
           {/* Connection Info */}
           {/*<div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">*/}
@@ -265,18 +305,29 @@ function App() {
                   >
                     {isLoading ? 'Creating...' : 'Create Game'}
                   </button>
-                  <input
-                      type="text"
-                      value={gameAddr}
-                      // placeholder=[#00ff00]
-                      onChange={(e) => setGameAddr(e.target.value)}
-                      placeholder="Or Enter Game Address to Join"
-                      // className="border border-matrix-green bg-black text-matrix-green p-2 rounded"
-                      className="border border-matrix-green bg-black text-matrix-green placeholder-[#00ff00] p-2 rounded"
+                  {/*<input*/}
+                  {/*    type="text"*/}
+                  {/*    value={gameAddr}*/}
+                  {/*    // placeholder=[#00ff00]*/}
+                  {/*    onChange={(e) => setGameAddr(e.target.value)}*/}
+                  {/*    placeholder="Or Enter Game Address to Join"*/}
+                  {/*    // className="border border-matrix-green bg-black text-matrix-green p-2 rounded"*/}
+                  {/*    className="border border-matrix-green bg-black text-matrix-green placeholder-[#00ff00] p-2 rounded"*/}
 
-                      // className="border p-2 rounded flex-grow font-mono text-sm"
-                      disabled={isLoading}
-                  />
+                  {/*    // className="border p-2 rounded flex-grow font-mono text-sm"*/}
+                  {/*    disabled={isLoading}*/}
+                  {/*/>*/}
+
+                                    <input
+                                      type="text"
+                                      value={gameAddr}
+                                      onChange={(e) => setGameAddr(e.target.value)}
+                                      placeholder="Or Enter Game Address to Join"
+                                      className="border border-[#00cc66] bg-black text-[#00cc66] placeholder-[#00cc66]/50 p-2 rounded font-mono"
+                                      disabled={isLoading}
+                                    />
+
+
                   <button
                       onClick={() => handleJoinGame(gameAddr)} // Pass current input value
                       disabled={!gameAddr || isLoading || !/^0x[a-fA-F0-9]{40}$/.test(gameAddr)}
@@ -379,6 +430,42 @@ function App() {
             {status}
           </p>
         </div>
+
+          {showStats && <StatsModal onClose={() => setShowStats(false)} />}
+          {/*{showStats && <StatsModal onClose={() => setShowStats(false)} stats={stats} />}*/}
+          {showInstructions && <InstructionsModal onClose={() => setShowInstructions(false)} />}
+
+
+          {/*{showStats && (*/}
+          {/*    <div className="fixed inset-0 bg-black bg-opacity-80 text-[#00ff00] p-4 z-50">*/}
+          {/*      <div className="max-w-md mx-auto bg-black border border-[#00cc66] p-4 rounded-lg shadow-[0_0_10px_#00ff00]">*/}
+          {/*        <h2 className="text-lg font-bold mb-2">📊 Stats</h2>*/}
+          {/*        <p>Coming soon: Wins, losses, game history, and wallet activity.</p>*/}
+          {/*        <button onClick={() => setShowStats(false)} className="mt-4 border border-[#00cc66] px-3 py-1 rounded hover:bg-[#00cc66] hover:text-black">*/}
+          {/*          Close*/}
+          {/*        </button>*/}
+          {/*      </div>*/}
+          {/*    </div>*/}
+          {/*)}*/}
+
+          {/*{showInstructions && (*/}
+          {/*    <div className="fixed inset-0 bg-black bg-opacity-80 text-[#00ff00] p-4 z-50">*/}
+          {/*      <div className="max-w-md mx-auto bg-black border border-[#00cc66] p-4 rounded-lg shadow-[0_0_10px_#00ff00]">*/}
+          {/*        <h2 className="text-lg font-bold mb-2">❔ How to Play</h2>*/}
+          {/*        <ul className="list-disc ml-5 space-y-1">*/}
+          {/*          <li>Connect your MetaMask wallet.</li>*/}
+          {/*          <li>Create a new game or join one via address.</li>*/}
+          {/*          <li>Click a cell to make a move. Players alternate turns.</li>*/}
+          {/*          <li>The game ends when someone wins or it’s a draw.</li>*/}
+          {/*        </ul>*/}
+          {/*        <button onClick={() => setShowInstructions(false)} className="mt-4 border border-[#00cc66] px-3 py-1 rounded hover:bg-[#00cc66] hover:text-black">*/}
+          {/*          Close*/}
+          {/*        </button>*/}
+          {/*      </div>*/}
+          {/*    </div>*/}
+          {/*)}*/}
+
+
       </div>
   );
 }

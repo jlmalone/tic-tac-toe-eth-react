@@ -1,6 +1,5 @@
 {
   "homepage": "https://jlmalone.github.io/tic-tac-toe-eth-react",
-
   "name": "tic-tac-toe-eth-react",
   "version": "0.1.0",
   "private": true,
@@ -16,6 +15,7 @@
     "ethers": "^6.13.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
