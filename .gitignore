@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/.idea/modules.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/tic-tac-toe-eth-react.iml
+/.idea/vcs.xml
