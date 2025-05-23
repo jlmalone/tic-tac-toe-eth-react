@@ -1,30 +1,40 @@
 // src/services/solanaService.ts
 import * as anchor from "@coral-xyz/anchor";
-import { AnchorProvider, Program, Idl as AnchorIdl } from "@coral-xyz/anchor";
-import { Connection, PublicKey, SystemProgram, Keypair, Transaction, VersionedTransaction } from "@solana/web3.js";
+import { utils as AnchorUtils } from "@coral-xyz/anchor"; // Import utils
+import { AnchorProvider, Program } from "@coral-xyz/anchor";
+import { Connection, PublicKey, Keypair, Transaction, VersionedTransaction } from "@solana/web3.js"; // SystemProgram removed as unused for now
 import { WalletContextState } from '@solana/wallet-adapter-react';
+import bs58 from "bs58"; // Changed to default import
 
 import { IBlockchainService, BoardState } from './blockchainServiceTypes';
 import { SOLANA_RPC_ENDPOINT, SOLANA_EXPECTED_NETWORK, SOLANA_TIC_TAC_TOE_PROGRAM_ID, SOLANA_EMPTY_CELL_FILLER_STRING } from '../solanaConfig';
 import { emojiForAddress as genericEmojiForAddress, shortenAddress as genericShortenAddress } from '../utils/helpers';
 
 import { TicTacToeSol as TicTacToeIdlType } from '../target/types/tic_tac_toe_sol';
-// import idlJsonFromTypes from '../target/types/tic_tac_toe_sol'; // Assuming this exports the IDL object directly
-import idlJsonFromFile from './idl/tic_tac_toe_sol.json'; // The actual JSON file
+import idlJsonFromFile from './idl/tic_tac_toe_sol.json';
 
-// Use the IDL JSON directly from the file for runtime.
-// The TicTacToeIdlType is for TypeScript's static analysis.
 const runtimeIdlObject = idlJsonFromFile as unknown as TicTacToeIdlType;
 
-// Ensure the runtimeIdlObject has the program address if needed by older Anchor versions or specific constructor overloads
-// The `address` field in your IDL JSON *is* the program ID.
+const GAME_ACCOUNT_SIZE = 372;
+const GAME_ACCOUNT_DISCRIMINATOR_STRING = "Game"; // PascalCase, matching your Rust struct
+const discriminatorNamespace = "account"; // Anchor's namespace for account discriminators
+const discriminatorInput = `${discriminatorNamespace}:${GAME_ACCOUNT_DISCRIMINATOR_STRING}`;
+const hashedDiscriminator = AnchorUtils.sha256.hash(discriminatorInput); // This returns a hex string
+const GAME_ACCOUNT_DISCRIMINATOR_BUFFER = Buffer.from(hashedDiscriminator.slice(0, 16), "hex"); // Take first 8 bytes (16 hex chars)
+
+
 if (!runtimeIdlObject.address) {
     // @ts-ignore
     runtimeIdlObject.address = SOLANA_TIC_TAC_TOE_PROGRAM_ID.toBase58();
 }
 
-
 type TypedProgram = Program<TicTacToeIdlType>;
+
+interface ClientSideAnchorWallet {
+    publicKey: PublicKey;
+    signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
+    signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]>;
+}
 
 class SolanaService implements IBlockchainService {
     private connection: Connection;
@@ -48,12 +58,9 @@ class SolanaService implements IBlockchainService {
         };
         const initialReadOnlyProvider = new AnchorProvider(this.connection, defaultWallet, { preflightCommitment: "confirmed" });
 
-        // Use the constructor signature: new Program(idl, provider?)
-        // The programId (SOLANA_TIC_TAC_TOE_PROGRAM_ID) is expected to be part of the IDL (runtimeIdlObject.address)
-        // or Anchor will use the `address` field from the IDL.
         this.program = new Program<TicTacToeIdlType>(
-            runtimeIdlObject,         // 1st arg: The IDL object (which includes the program address)
-            initialReadOnlyProvider // 2nd arg: An AnchorProvider instance
+            runtimeIdlObject,
+            initialReadOnlyProvider
         );
         this.updateProvider();
     }
@@ -83,10 +90,9 @@ class SolanaService implements IBlockchainService {
                 { preflightCommitment: "confirmed" }
             );
             anchor.setProvider(this.provider);
-            // Re-initialize the program with the new, real provider
             this.program = new Program<TicTacToeIdlType>(
                 runtimeIdlObject,
-                this.provider // Pass the provider as the second argument
+                this.provider
             );
         } else {
             const dummyKeypair = Keypair.generate();
@@ -100,14 +106,11 @@ class SolanaService implements IBlockchainService {
             this.provider = null;
             this.program = new Program<TicTacToeIdlType>(
                 runtimeIdlObject,
-                readOnlyProvider // Program instance still needs a provider
+                readOnlyProvider
             );
         }
     }
 
-    // ... (Rest of the SolanaService class methods: connectWallet, createGame, etc. should be mostly the same)
-    // Just ensure that they don't try to pass programId explicitly to a Program constructor if it's not expected.
-    // The key is that `this.program` is correctly initialized in constructor and updateProvider.
     async connectWallet(): Promise<string> {
         if (!this.walletContext.connected) {
             try {
@@ -120,7 +123,7 @@ class SolanaService implements IBlockchainService {
         if (!this.walletContext.publicKey) {
             throw new Error("Solana wallet connection failed or public key not available.");
         }
-        this.updateProvider(); // CRITICAL: Ensure provider is updated after connection attempt
+        this.updateProvider();
         if (this.accountChangedCallback) this.accountChangedCallback(this.walletContext.publicKey.toBase58());
         if (this.networkChangedCallback) this.networkChangedCallback(this.getNetworkIdentifier());
         return this.walletContext.publicKey.toBase58();
@@ -150,8 +153,9 @@ class SolanaService implements IBlockchainService {
                 .signers([gameKeypair])
                 .rpc();
             console.log("Solana game created, signature:", sig);
-            await this.setGameAddress(gameKeypair.publicKey.toBase58());
-            return gameKeypair.publicKey.toBase58();
+            const newGameAddress = gameKeypair.publicKey.toBase58();
+            await this.setGameAddress(newGameAddress);
+            return newGameAddress;
         } catch (error: any) {
             console.error("Solana: Failed to create game:", error, error?.logs);
             throw new Error(`Failed to create Solana game: ${error.message || error.toString()}`);
@@ -208,22 +212,16 @@ class SolanaService implements IBlockchainService {
             return Array(3).fill(null).map(() => Array(3).fill(this.getZeroAddress()));
         }
         const targetGamePk = new PublicKey(targetGamePkStr);
-
         try {
             const gameAccount = await this.program.account.game.fetch(targetGamePk);
-            if (!gameAccount || !Array.isArray(gameAccount.board) || gameAccount.board.length !== 9) {
-                console.error("Solana: Fetched game account has invalid board structure", gameAccount);
-                return Array(3).fill(null).map(() => Array(3).fill(this.getZeroAddress()));
-            }
-
-            const board: string[][] = Array(3).fill(null).map(() => Array(3).fill(this.getZeroAddress()));
+            const boardState: BoardState = Array(3).fill(null).map(() => Array(3).fill(this.getZeroAddress()));
             for (let r = 0; r < 3; r++) {
                 for (let c = 0; c < 3; c++) {
                     const cellPlayerPubkey = gameAccount.board[r * 3 + c] as PublicKey | null;
-                    board[r][c] = cellPlayerPubkey ? cellPlayerPubkey.toBase58() : this.getZeroAddress();
+                    boardState[r][c] = cellPlayerPubkey ? cellPlayerPubkey.toBase58() : this.getZeroAddress();
                 }
             }
-            return board;
+            return boardState;
         } catch (error: any) {
             console.error(`Solana: Failed to get board state for ${targetGamePkStr}:`, error);
             return Array(3).fill(null).map(() => Array(3).fill(this.getZeroAddress()));
@@ -236,9 +234,7 @@ class SolanaService implements IBlockchainService {
         try {
             const gameAccount = await this.program.account.game.fetch(new PublicKey(targetGamePkStr));
             return gameAccount.gameEnded;
-        } catch {
-            return false;
-        }
+        } catch { return false; }
     }
 
     async getWinner(gameId?: string): Promise<string> {
@@ -248,8 +244,51 @@ class SolanaService implements IBlockchainService {
             const gameAccount = await this.program.account.game.fetch(new PublicKey(targetGamePkStr));
             const winnerPubkey = gameAccount.winner as PublicKey | null;
             return winnerPubkey ? winnerPubkey.toBase58() : this.getZeroAddress();
-        } catch {
-            return this.getZeroAddress();
+        } catch { return this.getZeroAddress(); }
+    }
+
+    public async getAllSolanaGamesWithStatus(): Promise<Array<{ address: string; winner: string; ended: boolean }>> {
+        try {
+            console.log("Fetching all Solana game accounts using getProgramAccounts...");
+            const accounts = await this.connection.getProgramAccounts(
+                SOLANA_TIC_TAC_TOE_PROGRAM_ID,
+                {
+                    filters: [
+                        { dataSize: GAME_ACCOUNT_SIZE },
+                        {
+                            memcmp: {
+                                offset: 0,
+                                bytes: bs58.encode(GAME_ACCOUNT_DISCRIMINATOR_BUFFER)
+                            }
+                        }
+                    ]
+                }
+            );
+            console.log(`Found ${accounts.length} potential game accounts.`);
+
+            const gameDetailsPromises = accounts.map(async (accountInfo) => {
+                try {
+                    const gameData = this.program.coder.accounts.decode("game", accountInfo.account.data);
+
+                    return {
+                        address: accountInfo.pubkey.toBase58(),
+                        winner: gameData.winner ? (gameData.winner as PublicKey).toBase58() : this.getZeroAddress(),
+                        // ended: gameData.gameEnded as boolean
+                        ended: gameData.game_ended as boolean
+                    };
+                } catch (e) {
+                    console.warn(`Failed to decode game account ${accountInfo.pubkey.toBase58()}:`, e);
+                    return null;
+                }
+            });
+
+            const resolvedGameDetails = await Promise.all(gameDetailsPromises);
+            const validGameDetails = resolvedGameDetails.filter(detail => detail !== null) as Array<{ address: string; winner: string; ended: boolean }>;
+
+            return validGameDetails.sort((a,b) => a.address.localeCompare(b.address));
+        } catch (error) {
+            console.error("Error fetching Solana game accounts:", error);
+            throw new Error("Failed to fetch Solana game history from the blockchain.");
         }
     }
 
@@ -271,12 +310,4 @@ class SolanaService implements IBlockchainService {
         this.networkChangedCallback = null;
     }
 }
-
-// Re-define ClientSideAnchorWallet here as it was defined inside the class before
-interface ClientSideAnchorWallet {
-    publicKey: PublicKey;
-    signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
-    signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]>;
-}
-
 export default SolanaService;

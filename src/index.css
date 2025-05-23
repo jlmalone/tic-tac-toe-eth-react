@@ -27,3 +27,40 @@ code {
 body {
   animation: matrixFlicker 10s infinite;
 }
+
+button.wallet-adapter-button-trigger,
+button.wallet-adapter-button { /* Target common classes, be specific */
+  background: black !important;
+  color: #00cc66 !important;
+  border: 1px solid #00cc66 !important;
+  border-radius: 0.375rem !important; /* Tailwind's rounded-md */
+  padding: 0.5rem 1rem !important;  /* Tailwind's py-2 px-4 */
+  font-family: Menlo, Courier New, monospace !important;
+  font-size: 1rem !important;       /* Tailwind's text-base */
+  line-height: 1.5rem !important;  /* Tailwind's leading-6, good for py-2 */
+  width: 100% !important;
+  transition: background-color 0.2s, color 0.2s !important;
+  text-transform: none !important; /* Override any default text transformations */
+  font-weight: normal !important; /* Override any default font weights */
+  display: flex !important; /* Helps with icon and text alignment */
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+button.wallet-adapter-button-trigger:hover,
+button.wallet-adapter-button:hover {
+  background: #00cc66 !important;
+  color: black !important;
+}
+
+button.wallet-adapter-button-trigger:disabled,
+button.wallet-adapter-button:disabled {
+  opacity: 0.5 !important;
+  background: black !important; /* Keep background on disable if needed */
+  color: #00cc66 !important;   /* Keep text color on disable if needed */
+}
+
+/* Style the icon if necessary (example) */
+.wallet-adapter-button-icon img {
+  margin-right: 0.5rem; /* Add some space between icon and text */
+}
