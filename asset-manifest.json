@@ -1,13 +1,17 @@
 {
   "files": {
-    "main.css": "/tic-tac-toe-eth-react/static/css/main.e59cd925.css",
-    "main.js": "/tic-tac-toe-eth-react/static/js/main.f1f9e2d6.js",
+    "main.css": "/tic-tac-toe-eth-react/static/css/main.4c8df2be.css",
+    "main.js": "/tic-tac-toe-eth-react/static/js/main.869cffb0.js",
+    "static/js/648.264bb2c7.chunk.js": "/tic-tac-toe-eth-react/static/js/648.264bb2c7.chunk.js",
+    "static/js/227.fff4bc09.chunk.js": "/tic-tac-toe-eth-react/static/js/227.fff4bc09.chunk.js",
     "index.html": "/tic-tac-toe-eth-react/index.html",
-    "main.e59cd925.css.map": "/tic-tac-toe-eth-react/static/css/main.e59cd925.css.map",
-    "main.f1f9e2d6.js.map": "/tic-tac-toe-eth-react/static/js/main.f1f9e2d6.js.map"
+    "main.4c8df2be.css.map": "/tic-tac-toe-eth-react/static/css/main.4c8df2be.css.map",
+    "main.869cffb0.js.map": "/tic-tac-toe-eth-react/static/js/main.869cffb0.js.map",
+    "648.264bb2c7.chunk.js.map": "/tic-tac-toe-eth-react/static/js/648.264bb2c7.chunk.js.map",
+    "227.fff4bc09.chunk.js.map": "/tic-tac-toe-eth-react/static/js/227.fff4bc09.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e59cd925.css",
-    "static/js/main.f1f9e2d6.js"
+    "static/css/main.4c8df2be.css",
+    "static/js/main.869cffb0.js"
   ]
 }
