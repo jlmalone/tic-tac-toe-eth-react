@@ -4,6 +4,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@solana/web3.js": "^1.98.2",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -23,10 +29,12 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "npx react-app-rewired start",
+    "build": "npx react-app-rewired build",
+    "test": "npx react-app-rewired test",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -47,8 +55,19 @@
     ]
   },
   "devDependencies": {
+    "assert": "^2.1.0",
     "autoprefixer": "^10.4.19",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
+    "https-browserify": "^1.0.0",
+    "os-browserify": "^0.3.0",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.0"
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.2.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "tailwindcss": "^3.3.0",
+    "url": "^0.11.4",
+    "webpack": "^5.99.9"
   }
 }

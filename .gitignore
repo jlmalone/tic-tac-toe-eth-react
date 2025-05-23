@@ -25,3 +25,5 @@ yarn-error.log*
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/tic-tac-toe-eth-react.iml
 /.idea/vcs.xml
+/.env
+/package-lock.json
