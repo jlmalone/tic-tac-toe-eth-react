@@ -27,3 +27,4 @@ yarn-error.log*
 /.idea/vcs.xml
 /.env
 /package-lock.json
+/.idea/dictionaries/project.xml
