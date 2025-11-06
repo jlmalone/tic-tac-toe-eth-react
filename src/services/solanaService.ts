@@ -15,6 +15,7 @@ import idlJsonFromFile from './idl/tic_tac_toe_sol.json';
 
 const runtimeIdlObject = idlJsonFromFile as unknown as TicTacToeIdlType;
 
+// Game account size in bytes: 8 (discriminator) + 9*32 (board: 9 PublicKeys) + 1 (game_ended bool) + 32 (winner PublicKey) + 32 (last_player PublicKey) + padding = 372 bytes
 const GAME_ACCOUNT_SIZE = 372;
 const GAME_ACCOUNT_DISCRIMINATOR_STRING = "Game"; // PascalCase, matching your Rust struct
 const discriminatorNamespace = "account"; // Anchor's namespace for account discriminators

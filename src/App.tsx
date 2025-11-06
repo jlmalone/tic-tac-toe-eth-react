@@ -34,12 +34,12 @@ function App() {
   }, [selectedBlockchain, solanaWallet]);
 
 
-  const ZER0_ADDRESS_EQUIVALENT = useMemo(() => {
+  const ZERO_ADDRESS_EQUIVALENT = useMemo(() => {
     return blockchainService?.getZeroAddress() ||
         (selectedBlockchain === 'ethereum' ? ETH_ZERO_ADDRESS : SOLANA_EMPTY_CELL_FILLER_STRING);
   }, [blockchainService, selectedBlockchain]);
 
-  const initialBoard: BoardState = Array(3).fill(null).map(() => Array(3).fill(ZER0_ADDRESS_EQUIVALENT));
+  const initialBoard: BoardState = Array(3).fill(null).map(() => Array(3).fill(ZERO_ADDRESS_EQUIVALENT));
 
   const [account, setAccount] = useState<string | null>(null);
   const [networkIdentifier, setNetworkIdentifier] = useState<string | number | null>(null);
@@ -58,7 +58,7 @@ function App() {
   const handleRefreshBoard = useCallback(async (addrForRefreshInput?: string | null) => {
     if (!blockchainService) {
       setStatus("Blockchain service not available.");
-      setBoard(Array(3).fill(null).map(() => Array(3).fill(ZER0_ADDRESS_EQUIVALENT)));
+      setBoard(Array(3).fill(null).map(() => Array(3).fill(ZERO_ADDRESS_EQUIVALENT)));
       return;
     }
     const effectiveGameAddr = addrForRefreshInput !== undefined ? addrForRefreshInput : blockchainService.getGameAddress();
@@ -93,12 +93,12 @@ function App() {
       }
     } catch (err: any) {
       setStatus(`Error refreshing board: ${err.message}`);
-      setBoard(Array(3).fill(null).map(() => Array(3).fill(blockchainService?.getZeroAddress() || ZER0_ADDRESS_EQUIVALENT)));
+      setBoard(Array(3).fill(null).map(() => Array(3).fill(blockchainService?.getZeroAddress() || ZERO_ADDRESS_EQUIVALENT)));
       setIsGameOver(false);
     } finally {
       if (isManualRefresh) setIsLoading(false);
     }
-  }, [blockchainService, ZER0_ADDRESS_EQUIVALENT]); // Dependencies for handleRefreshBoard
+  }, [blockchainService, ZERO_ADDRESS_EQUIVALENT]); // Dependencies for handleRefreshBoard
 
   useEffect(() => {
     if (blockchainService) {
@@ -115,11 +115,11 @@ function App() {
     } else {
       setAccount(null);
       setNetworkIdentifier(null);
-      setBoard(Array(3).fill(null).map(() => Array(3).fill(ZER0_ADDRESS_EQUIVALENT)));
+      setBoard(Array(3).fill(null).map(() => Array(3).fill(ZERO_ADDRESS_EQUIVALENT)));
       setStatus(`Service for ${selectedBlockchain} not ready. Select blockchain and connect wallet.`);
       setGameAddr('');
     }
-  }, [selectedBlockchain, blockchainService, ZER0_ADDRESS_EQUIVALENT, handleRefreshBoard]);
+  }, [selectedBlockchain, blockchainService, ZERO_ADDRESS_EQUIVALENT, handleRefreshBoard]);
 
 
   useEffect(() => {
