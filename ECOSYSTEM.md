@@ -12,6 +12,7 @@
 | tic_tac_toe_android | `~/StudioProjects/tic_tac_toe_android/` | Android Jetpack Compose | ETH Sepolia | Web3j 5.0 | Working, tested |
 | tic_tac_toe_ios_ethereum | `~/ios_code/tic_tac_toe_ios_ethereum/` | SwiftUI | ETH Sepolia | Web3.swift | Working, tested |
 | tic_tac_toe_compose | `~/IdeaProjects/tic_tac_toe_compose/` | Kotlin Compose Desktop | ETH Sepolia | Web3j 5.0 | **BROKEN** |
+| tic-tac-toe-cli | `~/IdeaProjects/tic-tac-toe-cli/` | Kotlin Mosaic TUI | ETH Sepolia | Web3j 5.0 | New |
 | tic-tac-toe-sol | `~/RustroverProjects/tic-tac-toe-sol/` | Anchor/Rust | Solana Devnet | @coral-xyz/anchor | Deployed |
 
 ## Shared Contract Addresses
@@ -29,7 +30,7 @@
 
 ## ABI Sharing Pattern
 
-All 4 Ethereum clients use the same Factory + Game ABIs from the smart contract project. The contract interfaces are:
+All 5 Ethereum clients use the same Factory + Game ABIs from the smart contract project. The contract interfaces are:
 
 **Factory ABI:**
 - `createGame() returns (address)` — deploys a new game via EIP-1167 minimal proxy
@@ -49,6 +50,7 @@ Each platform implements these via its own library:
 | Android | Web3j 5.0 | Generated Java wrappers from Solidity |
 | iOS | Web3.swift | Manual ABI encoding in BlockchainService |
 | Compose Desktop | Web3j 5.0 | Same as Android |
+| CLI (Mosaic TUI) | Web3j 5.0 | Raw ABI encoding in BlockchainService |
 
 ## Matrix Theme Adoption
 
@@ -58,6 +60,7 @@ Each platform implements these via its own library:
 | Android | Yes | `TicTacToeMatrixTheme` in Compose Material3 |
 | iOS | Partial | Basic styling, no full Matrix treatment |
 | Compose Desktop | Yes | Matrix theming applied before broken state |
+| CLI (Mosaic TUI) | Yes | Matrix green Color(0,255,0) on black terminal |
 | Solana | N/A | Backend program only, no UI |
 
 ## Priority: tic_tac_toe_compose is BROKEN
@@ -89,6 +92,7 @@ The React web project has an experimental `solana` branch with:
 | Android | JUnit + Mockk + Kover | Blockchain unit tests |
 | iOS | XCTest | Comprehensive unit tests |
 | Compose Desktop | None | No test directory (tests untracked) |
+| CLI (Mosaic TUI) | None | No tests yet |
 | Solana | ts-mocha | Anchor test suite |
 
 ## Security Notes
