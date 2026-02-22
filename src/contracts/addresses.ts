@@ -57,8 +57,7 @@ export const CONTRACT_ADDRESSES: ContractAddresses = {
         factoryAddress: '0xa0B53DbDb0052403E38BBC31f01367aC6782118E', // <--- USE THIS NEW FACTORY ADDRESS
     },
     31337: { // Hardhat Local Node
-        // Keep the placeholder or update with your local deploy address
-        factoryAddress: '0xReplaceWithYourLocalFactoryAddress', // UPDATE THIS TOO IF YOU DEPLOY LOCALLY
+        factoryAddress: '0x4A679253410272dd5232B3Ff7cF5dbB88f295319', // Local Hardhat deployment
     }
     // ... (other networks)
 };

@@ -42,6 +42,14 @@ module.exports = function override(config, env) {
     });
     // ---- END: ADDED/MODIFIED SECTION ----
 
+    // Configure Jest for ES modules
+    if (env === 'test') {
+        config.transformIgnorePatterns = [
+            '/node_modules/(?!(react-markdown|remark-gfm|micromark|unist-util-stringify-position|mdast-util-to-string|trim-lines|trough|unified|bail|is-plain-obj|mdast-util-to-hast|hast-util-whitespace|hast-util-raw|hast-util-to-jsx-runtime|property-information|space-separated-tokens|comma-separated-tokens|hast-util-parse-selector|zwitch|html-void-elements|estree-util-is-identifier-name|estree-util-build-jsx|estree-util-to-js|astring|periscopic|estree-walker|is-reference|acorn|acorn-jsx|estree-util-visit|devlop|mdast-util-gfm|mdast-util-gfm-autolink-literal|mdast-util-gfm-footnote|mdast-util-gfm-strikethrough|mdast-util-gfm-table|mdast-util-gfm-task-list-item|ccount|markdown-table|mdast-util-from-markdown|mdast-util-to-markdown|decode-named-character-reference|character-entities|micromark-util-combine-extensions|micromark-util-chunked|micromark-util-decode-numeric-character-reference|micromark-util-decode-string|micromark-util-normalize-identifier|micromark-util-resolve-all|micromark-util-sanitize-uri|micromark-util-subtokenize|micromark-util-symbol|micromark-util-types|micromark-extension-gfm|micromark-extension-gfm-autolink-literal|micromark-extension-gfm-footnote|micromark-extension-gfm-strikethrough|micromark-extension-gfm-table|micromark-extension-gfm-tagfilter|micromark-extension-gfm-task-list-item|micromark-core-commonmark|micromark-factory-destination|micromark-factory-label|micromark-factory-space|micromark-factory-title|micromark-factory-whitespace|micromark-util-character|micromark-util-classify-character|micromark-util-html-tag-name|micromark-util-encode|micromark-util-events-to-acorn|micromark-util-sanitize-uri|micromark-util-subtokenize|micromark-util-symbol|micromark-util-types|unist-util-position|unist-util-visit|unist-util-visit-parents|unist-util-is|unist-util-remove-position|vfile|vfile-message|web-namespaces|hastscript|hast-util-parse-selector|space-separated-tokens|comma-separated-tokens|property-information|hast-util-whitespace|zwitch|html-void-elements|style-to-object|inline-style-parser|hast-util-from-parse5|parse5|entities|longest-streak|mdast-util-phrasing|mdast-util-find-and-replace|escape-string-regexp|character-entities-html4|character-entities-legacy|@types/)/.+\\.(js|jsx|mjs|cjs|ts|tsx)$',
+            '^.+\\.module\\.(css|sass|scss)$',
+        ];
+    }
+
     // Important: return the modified config
     return config;
 };
