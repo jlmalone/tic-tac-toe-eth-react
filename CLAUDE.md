@@ -1,7 +1,7 @@
 # CLAUDE.md — tic-tac-toe-eth-react
 
 > **Flagship** of the Tic-Tac-Toe Blockchain Ecosystem.
-> See [ECOSYSTEM.md](ECOSYSTEM.md) for full inventory of all 6 projects.
+> See [ECOSYSTEM.md](ECOSYSTEM.md) for full inventory of all 7 projects.
 
 ## Ecosystem Members
 
@@ -12,6 +12,7 @@
 | tic_tac_toe_android | `~/StudioProjects/tic_tac_toe_android/` | ETH Sepolia | Working |
 | tic_tac_toe_ios_ethereum | `~/ios_code/tic_tac_toe_ios_ethereum/` | ETH Sepolia | Working |
 | tic_tac_toe_compose | `~/IdeaProjects/tic_tac_toe_compose/` | ETH Sepolia | **BROKEN** |
+| tic-tac-toe-cli | `~/IdeaProjects/tic-tac-toe-cli/` | ETH Sepolia | Working |
 | tic-tac-toe-sol | `~/RustroverProjects/tic-tac-toe-sol/` | Solana Devnet | Deployed |
 
 ## Tech Stack
